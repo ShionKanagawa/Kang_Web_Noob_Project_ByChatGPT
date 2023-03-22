@@ -1,8 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+from markdown import markdown
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret_key'
+app.add_template_filter(markdown, 'markdown')
+
+
 
 # 创建数据库表
 def create_table():
@@ -19,6 +23,7 @@ def create_table():
 def insert_message(name, message):
     conn = sqlite3.connect('messages.db')
     c = conn.cursor()
+    message=markdown(message)
     c.execute('INSERT INTO messages (name, message) VALUES (?, ?)', (name, message))
     conn.commit()
     conn.close()

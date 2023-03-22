@@ -2,7 +2,13 @@
 <html>
   <head>
     <title>留言板</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+    <!-- Include highlight.js -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    <!-- Include markdown-it.js -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
   </head>
   <body>
     <h1>留言板</h1>
@@ -18,9 +24,10 @@
     <hr>
     {% if messages %}
       {% for message in messages %}
-        <p>{{ message[1] }}：</p>
-        <p>{{ message[2] }}</p>
-        <hr>
+        <div class="message">
+          <p>{{ message[1] }}：</p>
+          <pre><code class="language-markdown">{{ message[2]|markdown }}</code></pre>
+        </div>
       {% endfor %}
     {% else %}
       <p>暂无留言。</p>
