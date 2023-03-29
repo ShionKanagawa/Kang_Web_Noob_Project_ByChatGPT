@@ -26,6 +26,7 @@
         <div class="message-body">
           {{ message[2]|md|safe }}
         </div>
+        <p>发帖时间：{{ message[3] }}</p>
       </div>
     {% endfor %}
     {% else %}

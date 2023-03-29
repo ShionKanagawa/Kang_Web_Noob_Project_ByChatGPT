@@ -7,21 +7,19 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 from markdown.inlinepatterns import InlineProcessor
-
+import time
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret_key'
 
 
-
 def _highlight_code(self, code, lang):
     lexer = get_lexer_by_name(lang, stripall=True)
     formatter = HtmlFormatter()
     return highlight(code, lexer, formatter)
-    
+        
 
-    
 # 创建数据库表
 def create_table():
     conn = sqlite3.connect('messages.db')
@@ -29,7 +27,8 @@ def create_table():
     c.execute('''CREATE TABLE IF NOT EXISTS messages
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   name TEXT NOT NULL,
-                  message TEXT NOT NULL)''')
+                  message TEXT NOT NULL,
+                  timestamp TEXT NOT NULL)''')
     conn.commit()
     conn.close()
 
@@ -37,15 +36,20 @@ def create_table():
 def insert_message(name, message):
     conn = sqlite3.connect('messages.db')
     c = conn.cursor()
-    c.execute('INSERT INTO messages (name, message) VALUES (?, ?)', (name, message))
+    timestamp = int(time.time())
+    localtime = time.localtime(timestamp)
+    timestr = time.strftime('%Y-%m-%d %H:%M:%S', localtime)
+    c.execute('INSERT INTO messages (name, message, timestamp) VALUES (?, ?, ?)', (name, message, timestr))
     conn.commit()
     conn.close()
+
+
 
 # 获取所有留言
 def get_messages():
     conn = sqlite3.connect('messages.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM messages ORDER BY id DESC')
+    c.execute('SELECT id, name, message, timestamp FROM messages ORDER BY timestamp DESC')
     messages = c.fetchall()
     conn.close()
     return messages
