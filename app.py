@@ -1,13 +1,27 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
-from markdown import markdown
+import markdown
+from markdown.extensions.codehilite import CodeHiliteExtension
+from markdown.extensions.toc import TocExtension
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters import HtmlFormatter
+from markdown.inlinepatterns import InlineProcessor
+
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret_key'
-app.add_template_filter(markdown, 'markdown')
 
 
 
+def _highlight_code(self, code, lang):
+    lexer = get_lexer_by_name(lang, stripall=True)
+    formatter = HtmlFormatter()
+    return highlight(code, lexer, formatter)
+    
+
+    
 # 创建数据库表
 def create_table():
     conn = sqlite3.connect('messages.db')
@@ -23,7 +37,6 @@ def create_table():
 def insert_message(name, message):
     conn = sqlite3.connect('messages.db')
     c = conn.cursor()
-    message=markdown(message)
     c.execute('INSERT INTO messages (name, message) VALUES (?, ?)', (name, message))
     conn.commit()
     conn.close()
@@ -37,6 +50,26 @@ def get_messages():
     conn.close()
     return messages
 
+# 将 Markdown 转换为 HTML
+
+def md(text):
+    # Create a Markdown renderer object
+    renderer = markdown.Markdown()
+
+    # Define a function to handle code highlighting
+    def highlight_code(text):
+        # custom code highlighting logic here
+        return highlighted_text
+
+    # Replace the handleMatch method of InlineCodeProcessor with the highlight_code function
+    InlineProcessor.handleMatch = highlight_code
+
+    # Render the Markdown text using the modified renderer object
+    html = renderer.convert(text)
+    return html
+
+
+app.jinja_env.filters['md'] = md
 @app.route('/')
 def index():
     messages = get_messages()
